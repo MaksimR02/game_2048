@@ -20,12 +20,15 @@ function handleInput(event) {
       break;
 
     case "ArrowDown":
+      moveDown();
       break;
 
     case "ArrowLeft":
+      moveLeft();
       break;
 
     case "ArrowRight":
+      moveRight();
       break;
 
     default:
@@ -39,11 +42,22 @@ function moveUp() {
   slideTiles(grid.cellsGroupedByColumn);
 }
 
+function moveDown() {
+  slideTiles(grid.cellsGroupedByReversedColumn);
+}
+function moveLeft() {
+  slideTiles(grid.cellsGroupedByRow);
+}
+
+function moveRight() {
+  slideTiles(grid.cellsGroupedByReversedRow);
+}
+
 function slideTiles(groupedCells) {
-  groupedCells.forEach(group => slideTilesInGroup(group));
-  grid.cells.forEach(cell=>{
-    cell.hasTileForMerge() && cell.mergeTiles(); 
-  })
+  groupedCells.forEach((group) => slideTilesInGroup(group));
+  grid.cells.forEach((cell) => {
+    cell.hasTileForMerge() && cell.mergeTiles();
+  });
 }
 
 function slideTilesInGroup(group) {
@@ -70,7 +84,7 @@ function slideTilesInGroup(group) {
     } else {
       targetCell.linkTileForMerge(cellWithTile.linkedTile);
     }
-     
+
     cellWithTile.unLinkTile();
   }
 }

@@ -21,7 +21,7 @@ export class Tile {
       `${bgLightness < 50 ? 90 : 10}%`
     );
   }
-  removeFromDOM(){
+  removeFromDOM() {
     this.tileElement.remove();
   }
 }
