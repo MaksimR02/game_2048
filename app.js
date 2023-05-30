@@ -2,8 +2,8 @@ import { Grid } from "./grid.js";
 import { Tile } from "./tile.js";
 
 const gameBoard = document.getElementById("game-board");
-
 const grid = new Grid(gameBoard);
+
 grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
 grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
 
@@ -16,6 +16,11 @@ function setupInputOnce(params) {
 async function handleInput(event) {
   switch (event.key) {
     case "ArrowUp":
+      if (!canMoveUp()) {
+        setupInputOnce();
+        return;
+      }
+
       await moveUp();
       break;
 
@@ -24,7 +29,7 @@ async function handleInput(event) {
       break;
 
     case "ArrowLeft":
-     await moveLeft();
+      await moveLeft();
       break;
 
     case "ArrowRight":
@@ -49,6 +54,7 @@ async function moveUp() {
 async function moveDown() {
   await slideTiles(grid.cellsGroupedByReversedColumn);
 }
+
 async function moveLeft() {
   await slideTiles(grid.cellsGroupedByRow);
 }
@@ -60,7 +66,7 @@ async function moveRight() {
 async function slideTiles(groupedCells) {
   const promises = [];
 
-  groupedCells.forEach((group) => slideTilesInGroup(group,promises));
+  groupedCells.forEach((group) => slideTilesInGroup(group, promises));
 
   await Promise.all(promises);
 
@@ -69,11 +75,12 @@ async function slideTiles(groupedCells) {
   });
 }
 
-function slideTilesInGroup(group,promises) {
+function slideTilesInGroup(group, promises) {
   for (let i = 1; i < group.length; i++) {
     if (group[i].isEmpty()) {
       continue;
     }
+
     const cellWithTile = group[i];
 
     let targetCell;
@@ -87,6 +94,7 @@ function slideTilesInGroup(group,promises) {
     if (!targetCell) {
       continue;
     }
+
     promises.push(cellWithTile.linkedTile.waitForTransitionEnd());
 
     if (targetCell.isEmpty()) {
@@ -97,4 +105,28 @@ function slideTilesInGroup(group,promises) {
 
     cellWithTile.unLinkTile();
   }
+
+}
+
+function canMoveUp() {
+  return canMove(grid.cellsGroupedByColumn);
+}
+
+function canMove(groupedCells) {
+  return groupedCells.some((group) => canMoveInGroup(group));
+}
+
+function canMoveInGroup(group) {
+  return group.some((cell, index) => {
+    if (index === 0) {
+      return false;
+    }
+
+    if (cell.isEmpty()) {
+      return false;
+    }
+
+    const targetCell = group[index - 1];
+    return targetCell.canAccept(cell.linkedTile);
+  });
 }
